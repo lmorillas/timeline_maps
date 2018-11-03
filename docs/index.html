@@ -1,0 +1,330 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Itinerary Exhibit Sketch</title>
+    <style>
+    .timeline-container {border: 1px dotted #669566}
+    #whatsThis h1 {font-size: 16pt}
+    #whatsThis {font-size: 12pt}
+    </style>
+            <script type="text/javascript" src="http://api.simile-widgets.org/exhibit/HEAD/lib/jquery.js"></script>
+ 
+            <script src="http://api.simile-widgets.org/exhibit/HEAD/exhibit-api.js"
+                    type="text/javascript">
+            </script>
+            <script src="http://api.simile-widgets.org/exhibit/HEAD/extensions/time/time-extension.js?bundle=false"
+                    type="text/javascript" 
+                    rel="exhibit-extension">
+            </script>
+            <link href="http://api.simile-widgets.org/exhibit/HEAD/extensions/map/map-extension.js"
+                    data-ex-apikey="AIzaSyAFf2dBmbxI_2Jfs2ty-05I__yDubzE6Hk"
+                    type="text/javascript" 
+                    rel="exhibit-extension">
+            </link>
+<!-- 
+https://github.com/SAFeSEA/openEssayist-slim/blob/a3b9d859c9fb55e0cee3c3cc5b255b9697622763/templates/drafts/view.exhibit.twig
+
+    
+    Apparently, The spreadsheet was not published under my new account even though
+    I'm listed as owner. Had to 'publish' it first. Once having done so, the
+    published link looks like this: https://docs.google.com/spreadsheets/d/e/2PACX-1vSXmb6tv3ThsUp_uBnvLuB9PEA7C5eifsDpV5Wa1q68Xq0j8xerH6liR_IWuL-ykPQJzWVSalRPKkrj/pubhtml
+    However, the id for the feed, as shown in the link below, is the same as the ID
+    as shown in the url when looking at the spreadsheet on my drive. *whew*
+-->
+            <link 
+                rel="exhibit/data" 
+                type="application/jsonp"        href="https://spreadsheets.google.com/feeds/list/1qZ6Sgu2qcKy-Rbc-L_5YN-zJD2jErOw2BUhur3-yWlk/od6/public/basic?hl=en_US&alt=json-in-script"
+                data-ex-converter="googleSpreadsheets"
+            />
+
+
+
+
+<!-- the old way:
+   	<script src="http://api.simile-widgets.org/exhibit/HEAD/exhibit-api.js" type="text/javascript"></script>
+    <script src="http://api.simile-widgets.org/exhibit/HEAD/extensions/time/time-extension.js?bundle=false" type="text/javascript" rel="exhibit-extension"></script>
+
+
+    <link
+         rel='exhibit-extension'
+         type='text/javascript'
+         href='https://api.simile-widgets.org/exhibit/HEAD/extensions/map/map-extension.js'
+         data-ex-apikey='AIzaSyAFf2dBmbxI_2Jfs2ty-05I__yDubzE6Hk'
+    />
+    
+    <link 
+        rel="exhibit/data" 
+        type="application/jsonp"        href="https://spreadsheets.google.com/feeds/list/1551DtO5Y0ODBlzxVQNzuo06aSXG3S3IwhbPV3ABJJTU/od6/public/basic?hl=en_US&alt=json-in-script"
+        data-ex-converter="googleSpreadsheets"
+    />
+ -->
+    
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript">
+    // See: https://lmorillas.github.io/colera/ for a model.
+    function mymap(mapDiv) {
+        var styles = [
+            {
+                featureType: 'poi',
+                stylers: [{visibility: 'on'}]
+            },
+            {
+                featureType: 'transit',
+                stylers: [{visibility: 'on'}]
+            },
+            {
+                featureType: "landscape",
+                elementType: "labels",
+                stylers: [{ visibility: 'on' }]
+            },
+            {
+                featureType: "administrative",
+                elementType: "labels",
+                stylers: [{ visibility: "on" }]
+            },
+
+            {
+                featureType: "road",
+                elementType: "labels",
+                stylers: [{ visibility: "on" }]
+            },
+        ];
+            //TODO: def var to keep map out of global scope
+        map = new google.maps.Map(mapDiv, {
+            center: {lat: 42.5007673, lng: -123.1927621},
+            zoom: 5,
+            styles: styles,
+            mapTypeId: google.maps.MapTypeId.TERRAIN,
+        });
+
+        return map;
+    }
+</script>
+
+<script>
+    function timelineConfig (div, eventSource) {
+        console.log("timelineConstructor was called");
+        div.style.height="300px";
+        div.style.width = '500px'
+        var theme = Timeline.ClassicTheme.create();
+        var d = new Date(1960, 0, 1);
+        theme.event.bubble.width = 600;
+        theme.event.bubble.height = 300;
+        theme.ether.backgroundColors[1] = theme.ether.backgroundColors[0];
+        bandInfos = [
+            Timeline.createBandInfo({
+                width: "85%",
+                intervalUnit: SimileAjax.DateTime.MONTH,
+                intervalPixels: 220,
+                eventSource: eventSource,
+                date: d,
+                theme: theme
+            }),
+            Timeline.createBandInfo({
+                width: "15%",
+                intervalUnit: SimileAjax.DateTime.YEAR,
+                intervalPixels: 100,
+                eventSource: eventSource,
+                date: d,
+                overview: true,
+                theme: theme
+            })
+        ];
+        bandInfos[0].decorators = [
+            new Timeline.SpanHighlightDecorator({
+                startDate: "Jan 01 1985 00:00:00 GMT",
+                endDate: "Jan 01 1987 00:00:00 GMT",
+                color: "blue",
+                opacity: 15,
+                startLabel: "span test",
+                endLabel: "end span test",
+                theme: theme
+            })
+        ];
+        bandInfos[1].highlight = true;
+        bandInfos[1].syncWith = 0;
+        tl = Timeline.create(div, bandInfos, Timeline.HORIZONTAL);
+        window.tl = tl;
+        return tl;
+    }
+    
+</script>
+
+<script>
+
+function showMarkerCoords(){
+    var div = jQuery("#markerCoords");
+    div.append("<ul>");
+    var themap = exhibit.getComponent("theMap");
+    var markers = themap._overlays;
+    var markerObj = new Object();
+    for (m in markers){
+        mll = [markers[m].position.lat(), markers[m].position.lng()];
+        markerObj[mll] = markers[m];
+    };
+
+    for (x in markerObj){
+        div.append("<li>" + x + "</li>");
+    }
+    div.append("</ul>");
+}
+
+
+function deriveMarkersObj(){
+
+    var themap = exhibit.getComponent("theMap");
+    var markers = themap._overlays;//I'm guessing this isn't just markers, but any overlay artifact.
+    var markerObj = new Object();
+    for (m in markers){
+        mll = [markers[m].position.lat().toFixed(7), markers[m].position.lng().toFixed(7)];
+        markerObj[mll] = markers[m];
+        markers[m].setVisible(false);
+    };
+
+    return markerObj;
+}
+
+$( document ).ready(function() {
+/******************************  
+    In an onLoad function we can use jQuery to set listeners for exhibit events,
+    and when they occur, we can attach behaviors thereto.
+******************************/      
+    jQuery(document).on("registerComponents.exhibit", function(ev){
+        console.log("be cool; I'm handling this event: ", ev);
+    });
+    
+    jQuery(document).on("exhibitConfigured.exhibit", function(ev){
+        console.log("and after a decent interval, I'm now handling this one: ", ev);
+
+    /******************************  
+        from https://github.com/simile-widgets/exhibit/wiki/Scripted-Event-API:
+        "exhibitConfigured.exhibit is triggered when the Exhibit instance
+        configuration (usually from DOM) is done. This event sends an
+        Exhibit._Impl as its only argument. Exhibit listens to itself to start
+        initializing the bookmark and history systems."
+
+        So, upon exhibitConfigured.exhibit, `tl` and `exhibit` and the Map
+        should all be available to scripts placed here.
+    ******************************/
+        
+
+
+    /**************************
+        From the map, as generated by the map-view.js, now generate a markersObj
+        with latlng keys and marker values. This still doesn't associate the marker
+        with the event, but with ll keys we can lookup markers in the .LatLong field
+        of the event. Is depending on the ll matching fragile in ways that haven't
+        occured to me? Looking up by Id, or string would be better. NB this happens
+        on the exhibitConfigured event Updating the markerObj on scroll works, but
+        seems expensive. Would it scale?
+    **************************/
+        var markerObj = deriveMarkersObj(); //refactored this to be an independent function.
+        var b0 = window.tl.getBand(0);
+        
+                        
+    /*************************
+        Add a ScrollListener function to a timeline band to show/hide map
+        markers. For each increment of scroll we loop over the whole `markerObj`
+        to see what events are in, or not in, `visibleEvents`. With the addition
+        of the line updating the markerObj, this now works even after changing
+        the facet selection or 'Reset All Filters,' but it's expensive and I
+        worry that it wont scale to a real data set. If anybody has a suggestion
+        as to how I might do this more efficiently, I'd sure like to hear about
+        it.
+    *************************/        
+        b0.addOnScrollListener(function(){
+            markerObj = deriveMarkersObj();
+            visibleEvents = {};
+            var dmax = b0.getMaxVisibleDate();
+            var dmin = b0.getMinVisibleDate();
+            var iterator = b0.getEventSource().getEventIterator(dmin,dmax);
+            while (iterator.hasNext()) {
+                var e = iterator.next();
+                visibleEvents[e.getProperty('LatLong')] = true;
+            };
+                       
+            for (var latlongKey in markerObj){
+                visibleEvents[latlongKey] ? markerObj[latlongKey].setVisible(true) : markerObj[latlongKey].setVisible(false);
+            }
+
+        });
+    }); //end exhibitConfigured listener function.
+
+}); //end onLoad function
+
+</script>
+
+</head>
+<body>
+<div id="whatsThis">
+<h1>Prototype Exhibit3 page</h1>
+<p>The current state of my investigation into using Exhibit3 js to display events on a timeline, and dynamically display their locations on a map.</p>
+</div>
+<table width="100%" cellspacing="20">
+   <tr valign="top">
+      <td width="33%">
+        <div data-ex-role="coordinator" id="location"></div>
+         <div data-ex-role="view"
+            id="theTime"
+            data-ex-timeline-constructor = "timelineConfig"
+            data-ex-view-class="Timeline"
+            data-ex-start=".Start"
+            data-ex-end=".End"
+            data-ex-select-coordinator="location"
+            data-ex-bubble-width="600"
+            data-ex-bubble-height="70%" 
+			data-ex-color-coder="event-colors"
+            data-ex-color-key=".eventType">
+         </div> 
+      </td>
+  
+      <td width="25%" class="fontstyle" bgcolor="#FFFFFF" height="200">
+         <div data-ex-role="facet" data-ex-facet-class="TextSearch" data-ex-facet-label="Search"></div>
+         <div data-ex-role="facet" data-ex-expression=".LatLong" data-ex-facet-label="coordinates"></div>
+         <div data-ex-role="facet" data-ex-expression=".label" data-ex-facet-label="label"></div>
+      </td>
+    <td>
+            <div
+            id="theMap"
+            data-ex-role='view'
+            data-ex-view-class='Map'
+            data-ex-map-constructor="mymap"
+            data-ex-latlng='.LatLong'
+            data-ex-select-coordinator="location"
+            data-ex-label='TheMap'
+            data-ex-bubble-width='200'
+            data-ex-bubble-height='200'
+            data-ex-type='terrain'
+            data-ex-show-summary='true'
+            >
+            </div>
+        </td>
+
+   </tr>
+   <tr>
+        <td>
+        <div data-ex-role="view" data-ex-view-class="Tabular"
+          data-ex-columns=".LatLong, .label, .Start"
+          ></div>            
+        </td>
+        <td>
+        <p><button onclick="showMarkerCoords();">click this button to show the marker coordinates <b>as they are generated by GMaps v3</b>. It's still not clear to me why in half these locations the longitude is rounded to an additional 7 decimal places.</button></p>
+        <div id="markerCoords"></div>
+        </td>
+   </tr>
+</table>
+   
+<div data-ex-role="lens">
+   <b data-ex-content=".label"></b>
+   <p data-ex-content=".description"></p>
+   <em><p data-ex-content=".LatLong"></p></em>
+</div>
+
+<div id="footer"><!--begin footer-->
+
+</div>
+<!--end footer-->
+</body>
+
+</html>
