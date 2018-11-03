@@ -1,2 +1,2 @@
-# timeline_maps
+# timeline & maps
 Using timelines and maps as facets
